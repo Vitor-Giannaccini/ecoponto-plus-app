@@ -1,24 +1,28 @@
 // components/StyledInput.js
+
 import React, { useState } from 'react';
 import { View, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { COLORS } from '../constants/colors';
+import { commonStyles } from '../constants/commonStyles'; // 1. Importa os estilos comuns
 
 const StyledInput = ({ iconName, placeholder, isPassword, ...props }) => {
   const [isPasswordVisible, setPasswordVisible] = useState(false);
 
   return (
-    <View style={styles.container}>
-      {iconName && <Ionicons name={iconName} size={22} color="#aaa" style={styles.icon} />}
+    // 2. Aplica o estilo de container comum
+    <View style={[commonStyles.inputContainerStyle, styles.viewContainer]}>
+      {iconName && <Ionicons name={iconName} size={22} color={COLORS.lightGray} style={styles.icon} />}
       <TextInput
-        style={styles.input}
+        style={[styles.input, commonStyles.textInputStyle]} // 3. Aplica o estilo de texto comum
         placeholder={placeholder}
-        placeholderTextColor="#aaa"
+        placeholderTextColor={COLORS.lightGray}
         secureTextEntry={isPassword && !isPasswordVisible}
         {...props}
       />
       {isPassword && (
         <TouchableOpacity onPress={() => setPasswordVisible(!isPasswordVisible)}>
-          <Ionicons name={isPasswordVisible ? 'eye-off-outline' : 'eye-outline'} size={22} color="#aaa" />
+          <Ionicons name={isPasswordVisible ? 'eye-off-outline' : 'eye-outline'} size={22} color={COLORS.lightGray} />
         </TouchableOpacity>
       )}
     </View>
@@ -26,23 +30,18 @@ const StyledInput = ({ iconName, placeholder, isPassword, ...props }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: 'white',
-    width: '100%',
-    height: 50,
-    borderRadius: 10,
+  // O estilo do container foi movido para commonStyles, aqui ficam só os ajustes
+  viewContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 15,
-    marginVertical: 10,
   },
   icon: {
     marginRight: 10,
   },
+  // O estilo do texto foi movido para commonStyles, aqui ficam só os ajustes
   input: {
     flex: 1,
     height: '100%',
-    color: '#333',
   },
 });
 

@@ -8,6 +8,8 @@ import {
   Image,
   KeyboardAvoidingView,
   Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import StyledInput from '../components/StyledInput';
@@ -24,24 +26,19 @@ const LoginScreen = ({ navigation }) => {
   };
 
   return (
-    // 1. Um container principal que vai segurar tanto o fundo quanto o conteúdo
-    <View style={styles.container}>
-      {/* 2. O gradiente agora é o fundo absoluto, preenchendo toda a tela */}
+    <SafeAreaView style={styles.safeArea}>
       <LinearGradient
         colors={['#ffe0b8', '#D2B48C']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0, y: 1 }}
-        // StyleSheet.absoluteFill faz o gradiente se comportar como um papel de parede
         style={StyleSheet.absoluteFill}
       />
-      
-      {/* 3. O SafeAreaView agora fica por cima, de forma transparente,
-          apenas para posicionar o conteúdo dentro da área segura */}
-      <SafeAreaView style={styles.safeArea}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={styles.keyboardContainer}
-        >
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardContainer}
+      >
+        {/* 1. O TouchableWithoutFeedback começa aqui */}
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+
+          {/* 2. Ele precisa de um único filho, que é o seu container principal */}
           <View style={styles.innerContainer}>
             <View style={styles.logoContainer}>
               <Image source={require('../assets/logo.png')} style={styles.logo} resizeMode="contain" />
@@ -70,11 +67,12 @@ const LoginScreen = ({ navigation }) => {
             <TouchableOpacity>
               <Text style={styles.linkText}>ESQUECI A MINHA SENHA</Text>
             </TouchableOpacity>
-            
           </View>
-        </KeyboardAvoidingView>
-      </SafeAreaView>
-    </View>
+
+        </TouchableWithoutFeedback>
+        {/* 3. O TouchableWithoutFeedback termina aqui */}
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
