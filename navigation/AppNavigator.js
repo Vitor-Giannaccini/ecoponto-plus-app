@@ -19,6 +19,7 @@ import WalletScreen from '../screens/WalletScreen';
 import AboutScreen from '../screens/AboutScreen';
 import MapScreen from '../screens/MapScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import CustomTabBar from '../components/CustomTabBar';
 
 // --- Inicializadores dos Navegadores ---
 const Stack = createStackNavigator();
@@ -36,113 +37,21 @@ const styles = StyleSheet.create({
   }
 });
 
-// --- Componente do Botão de Ação Customizado (FAB) ---
-const CustomTabBarButton = ({ children, onPress }) => (
-  <TouchableOpacity
-    style={{
-      top: -30,
-      justifyContent: 'center',
-      alignItems: 'center',
-      ...styles.shadow
-    }}
-    onPress={onPress}
-  >
-    <View style={{
-      width: 70,
-      height: 70,
-      borderRadius: 35,
-      backgroundColor: COLORS.accent,
-      alignItems: 'center',
-      justifyContent: 'center'
-    }}>
-      {children}
-    </View>
-  </TouchableOpacity>
-);
-
-const TabBarIcon = ({ focused, iconName, label }) => {
-  const icon = focused ? iconName : `${iconName}-outline`;
-  
-  return (
-    <View style={{ alignItems: 'center', justifyContent: 'center', width: 60 }}>
-      <Ionicons name={icon} size={24} color={COLORS.primary} />
-      <Text style={{ color: COLORS.primary, fontSize: 12 }}>{label}</Text>
-    </View>
-  );
-};
-
-// --- Navegador Inferior (Tabs) ---
-// Em navigation/AppNavigator.js
-
+// --- Navegador Inferior (Tabs) com Estilo Flutuante ---
 function MainTabs() {
   return (
     <Tab.Navigator
+      tabBar={props => <CustomTabBar {...props} />}
       screenOptions={{
         headerShown: false,
-        tabBarShowLabel: false,
-        tabBarStyle: {
-          position: 'absolute',
-          bottom: 25,
-          left: 20,
-          right: 20,
-          backgroundColor: '#ffffff',
-          borderRadius: 15,
-          height: 65,
-          ...styles.shadow
-        },
-        tabBarItemStyle: {
-          justifyContent: 'center' // Isso ajuda no alinhamento vertical
-        }
-      }}
-      sceneContainerStyle={{
-        paddingBottom: 100, // Ajuste para a nova altura da barra
       }}
     >
-      <Tab.Screen 
-        name="Home" 
-        component={HomeScreen} 
-        options={{ 
-          tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} iconName="home" label="Início" />
-        }} 
-      />
-      <Tab.Screen 
-        name="Wallet" 
-        component={WalletScreen} 
-        options={{ 
-          tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} iconName="wallet" label="Carteira" />
-        }} 
-      />
-      
-      <Tab.Screen
-        name="RegisterAction"
-        options={{
-          tabBarIcon: () => (<Ionicons name="qr-code" size={30} color={COLORS.dark} />),
-          tabBarButton: (props) => (<CustomTabBarButton {...props} />),
-        }}
-        listeners={({ navigation }) => ({
-          tabPress: (e) => {
-            e.preventDefault();
-            navigation.navigate('RegistroModal');
-          },
-        })}
-      >
-        {() => null}
-      </Tab.Screen>
-      
-      <Tab.Screen 
-        name="Map" 
-        component={MapScreen} 
-        options={{ 
-          tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} iconName="map" label="Mapa" />
-        }} 
-      />
-      <Tab.Screen 
-        name="Profile" 
-        component={ProfileScreen} 
-        options={{ 
-          tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} iconName="person" label="Perfil" />
-        }} 
-      />
+
+      <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen name="Wallet" component={WalletScreen} />
+      <Tab.Screen name="RegisterAction">{() => null}</Tab.Screen>
+      <Tab.Screen name="Map" component={MapScreen} />
+      <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );
 }
@@ -190,12 +99,21 @@ function AppDrawer() {
   );
 }
 
-// --- Pilha de Telas do App Principal (para permitir o Modal de Registro) ---
+// --- Pilha de Telas do App Principal ---
 function AppStack() {
   return (
     <Stack.Navigator>
       <Stack.Screen name="AppDrawer" component={AppDrawer} options={{ headerShown: false }} />
-      <Stack.Screen name="RegistroModal" component={RegisterScreen} options={{ presentation: 'modal', headerShown: true, title: 'Registrar Descarte' }} />
+      <Stack.Screen
+        name="RegistroModal"
+        component={RegisterScreen}
+        options={{
+          presentation: 'modal',
+          headerShown: true,
+          title: 'Registrar Descarte',
+          headerBackTitle: 'Voltar',
+        }}
+      />
     </Stack.Navigator>
   )
 }
