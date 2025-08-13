@@ -23,19 +23,43 @@ import { COLORS } from '../constants/colors';
 import ScannerOverlay from '../components/ScannerOverlay';
 import { Ionicons, MaterialIcons, MaterialCommunityIcons, FontAwesome6 } from '@expo/vector-icons';
 
+import { auth, db } from '../firebaseConfig';
+import { collection, doc, runTransaction, serverTimestamp } from "firebase/firestore";
+
 // Constantes
 const SCANNER_FRAME_SIZE = 250;
 const { width, height } = Dimensions.get('window');
 const MATERIAL_OPTIONS = ['Plástico', 'Vidro', 'Metal', 'Papel', 'Orgânico'];
 
-// screens/RegisterScreen.js
+const MATERIAL_POINTS_RULES = {
+  // Recicláveis (por Kg)
+  'Papéis e Papelão': { points: 10, type: 'per_kg' },
+  'Plásticos': { points: 15, type: 'per_kg' },
+  'Vidros': { points: 5, type: 'per_kg' },
+  'Metais': { points: 20, type: 'per_kg' },
+
+  // Construção (por Kg)
+  'Entulho': { points: 2, type: 'per_kg' },
+  'Cerâmicas': { points: 2, type: 'per_kg' },
+  'Madeiras': { points: 3, type: 'per_kg' },
+
+  // Itens Grandes (por Unidade, o peso vira a quantidade)
+  'Móveis': { points: 50, type: 'per_unit' },
+  'Eletrodomésticos': { points: 100, type: 'per_unit' },
+  'Pneus Usados': { points: 25, type: 'per_unit' },
+
+  // Eletrônicos (por Unidade)
+  'Celulares': { points: 30, type: 'per_unit' },
+  'Computadores': { points: 80, type: 'per_unit' },
+  'TVs e Rádios': { points: 60, type: 'per_unit' },
+};
 
 const MATERIAL_CATEGORIES = [
   { 
     name: 'Recicláveis Comuns', 
     icon: { library: 'MaterialCommunityIcons', name: 'recycle' },
     items: [
-      { name: 'Papéis/Papelão', icon: { library: 'Ionicons', name: 'newspaper-outline' } },
+      { name: 'Papéis e Papelão', icon: { library: 'Ionicons', name: 'newspaper-outline' } },
       { name: 'Plásticos', icon: { library: 'MaterialCommunityIcons', name: 'toy-brick' } },
       { name: 'Vidros', icon: { library: 'MaterialCommunityIcons', name: 'bottle-wine-outline' } },
       { name: 'Metais', icon: { library: 'MaterialCommunityIcons', name: 'magnet-on' } },
@@ -217,15 +241,85 @@ const RegisterScreen = ({ navigation }) => {
   };
 
   // Função para enviar o descarte para o Firebase
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!selectedMaterial || !weight.trim()) {
       Alert.alert("Erro", "Por favor, selecione um material e insira o peso.");
       return;
     }
-    console.log('Enviando para o banco de dados:', { ecopontoId: scannedData, material: selectedMaterial, peso: weight });
-    // --- LÓGICA PARA SALVAR NO FIREBASE VIRÁ AQUI ---
-    Alert.alert("Sucesso!", "Descarte registrado com sucesso!");
-    navigation.goBack();
+
+    const user = auth.currentUser;
+    if (!user) {
+      Alert.alert("Erro", "Você precisa estar logado para registrar um descarte.");
+      return;
+    }
+
+    const weightNumber = parseFloat(weight.replace(',', '.'));
+    if (isNaN(weightNumber) || weightNumber <= 0) {
+      Alert.alert("Peso Inválido", "Por favor, insira um número válido para o peso.");
+      return;
+    }
+
+    const rule = MATERIAL_POINTS_RULES[selectedMaterial];
+    let pointsAwarded = 0;
+    
+    // Cria a base do objeto de dados que será salvo
+    const disposalData = {
+      userId: user.uid,
+      ecopontoId: scannedData,
+      material: selectedMaterial,
+      createdAt: serverTimestamp(),
+      status: 'pending_validation'
+    };
+
+    if (rule) {
+      if (rule.type === 'per_kg') {
+        pointsAwarded = Math.round(rule.points * weightNumber);
+        // Adiciona o campo 'weight' ao nosso objeto de dados
+        disposalData.weight = weightNumber;
+        disposalData.quantity = null; // Deixa o outro campo nulo para clareza
+      } else if (rule.type === 'per_unit') {
+        const quantity = Math.round(weightNumber); // Quantidade deve ser um número inteiro
+        pointsAwarded = rule.points * quantity;
+        // Adiciona o campo 'quantity' ao nosso objeto de dados
+        disposalData.quantity = quantity;
+        disposalData.weight = null; // Deixa o outro campo nulo
+      }
+    }
+
+    if (pointsAwarded === 0) {
+      Alert.alert("Erro", "Não foi possível calcular os pontos para este material.");
+      return;
+    }
+    
+    // Adiciona os pontos calculados ao objeto de dados final
+    disposalData.pointsAwarded = pointsAwarded;
+
+    try {
+      await runTransaction(db, async (transaction) => {
+        const userDocRef = doc(db, "users", user.uid);
+        const newDisposalRef = doc(collection(db, "disposals"));
+
+        const userDoc = await transaction.get(userDocRef);
+        if (!userDoc.exists()) {
+          throw "Documento do usuário não encontrado!";
+        }
+        
+        const currentPoints = userDoc.data().totalPoints || 0;
+        const newTotalPoints = currentPoints + pointsAwarded;
+
+        // Agora salvamos o objeto 'disposalData' que preparamos
+        transaction.set(newDisposalRef, disposalData);
+
+        transaction.update(userDocRef, { totalPoints: newTotalPoints });
+      });
+
+      Alert.alert("Sucesso!", `Descarte registrado com sucesso! Você ganhou ${pointsAwarded} pontos!`);
+      navigation.goBack();
+
+    } catch (error) {
+      console.error("Erro ao registrar descarte: ", error);
+      Alert.alert("Erro", "Não foi possível registrar seu descarte. Tente novamente.");
+    }
   };
 
   if (hasPermission === null) return <View />;
@@ -259,7 +353,7 @@ const RegisterScreen = ({ navigation }) => {
                 {/* PASSO 1: MOSTRAR CATEGORIAS */}
                 {!selectedCategory && (
                     <View>
-                        <Text style={styles.label}>1. Selecione a Categoria:</Text>
+                        <Text style={styles.label}>1. Selecione a categoria:</Text>
                         {MATERIAL_CATEGORIES.map((category) => (
                             <TouchableOpacity
                                 key={category.name}
@@ -302,20 +396,41 @@ const RegisterScreen = ({ navigation }) => {
 
                 {/* PASSO 3: MOSTRAR CAMPO DE PESO E BOTÃO FINAL */}
                 {selectedMaterial && (
-                    <View>
-                        <Text style={styles.label}>Material Selecionado:</Text>
-                        <Text style={styles.selectedItemText}>{selectedMaterial}</Text>
+                  <View>
+                    <Text style={styles.label}>Material selecionado:</Text>
+                    <Text style={styles.selectedItemText}>{selectedMaterial}</Text>
 
-                        <Text style={styles.label}>3. Informe o Peso (em kg):</Text>
+                    {/* --- LÓGICA DINÂMICA APLICADA AQUI --- */}
+                    
+                    {/* Verifica qual é a regra para o material selecionado */}
+                    {MATERIAL_POINTS_RULES[selectedMaterial]?.type === 'per_unit' ? (
+                      // Se for por unidade, mostra "Quantidade"
+                      <>
+                        <Text style={styles.label}>3. Informe a quantidade (unidades):</Text>
                         <TextInput
-                            style={styles.input}
-                            placeholder="Ex: 2.5"
-                            value={weight}
-                            onChangeText={setWeight}
-                            keyboardType="numeric"
+                          style={styles.input}
+                          placeholder="Ex: 3"
+                          value={weight}
+                          onChangeText={setWeight}
+                          keyboardType="numeric"
                         />
-                        <Button title="Confirmar Descarte" onPress={handleSubmit} color={COLORS.primary} />
-                    </View>
+                      </>
+                    ) : (
+                      // Caso contrário, mostra "Peso"
+                      <>
+                        <Text style={styles.label}>3. Informe o peso (em kg):</Text>
+                        <TextInput
+                          style={styles.input}
+                          placeholder="Ex: 2.5"
+                          value={weight}
+                          onChangeText={setWeight}
+                          keyboardType="numeric"
+                        />
+                      </>
+                    )}
+                    
+                    <Button title="Confirmar Descarte" onPress={handleSubmit} color={COLORS.primary} />
+                  </View>
                 )}
                 <View style={{ marginTop: 20 }}>
                     <Button title="Cancelar e Escanear Novamente" onPress={() => { setStep('scanning'); isProcessingScan.current = false; setSelectedCategory(null); setSelectedMaterial(null); }} color="grey" />
