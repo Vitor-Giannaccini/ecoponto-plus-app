@@ -36,8 +36,8 @@ const TabBarIcon = ({ focused, iconName, label }) => {
 const CustomTabBar = ({ state, navigation }) => {
   const iconConfig = {
     'Home': { iconName: 'home', label: 'Início' },
-    'Wallet': { iconName: 'wallet', label: 'Carteira' },
     'Map': { iconName: 'map', label: 'Mapa' },
+    'History': { iconName: 'receipt', label: 'Histórico' },
     'Profile': { iconName: 'person', label: 'Perfil' },
   };
 

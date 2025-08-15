@@ -15,7 +15,7 @@ import LoginScreen from '../screens/LoginScreen';
 import SignUpScreen from '../screens/SignUpScreen';
 import HomeScreen from '../screens/HomeScreen';
 import RegisterScreen from '../screens/RegisterScreen';
-import WalletScreen from '../screens/WalletScreen';
+import HistoryScreen from '../screens/HistoryScreen';
 import AboutScreen from '../screens/AboutScreen';
 import MapScreen from '../screens/MapScreen';
 import ProfileScreen from '../screens/ProfileScreen';
@@ -48,9 +48,9 @@ function MainTabs() {
     >
 
       <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Wallet" component={WalletScreen} />
-      <Tab.Screen name="RegisterAction">{() => null}</Tab.Screen>
       <Tab.Screen name="Map" component={MapScreen} />
+      <Tab.Screen name="RegisterAction">{() => null}</Tab.Screen>
+      <Tab.Screen name="History" component={HistoryScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );

@@ -1,4 +1,4 @@
-// screens/WalletScreen.js
+// screens/HistoryScreen.js
 
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, ActivityIndicator, Image } from 'react-native';
@@ -10,7 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { MATERIAL_CATEGORIES } from '../constants/materials';
 import CategoryIcon from '../components/CategoryIcon';
 
-const WalletScreen = () => {
+const HistoryScreen = () => {
   const [userData, setUserData] = useState(null);
   const [disposalHistory, setDisposalHistory] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -211,4 +211,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default WalletScreen;
+export default HistoryScreen;

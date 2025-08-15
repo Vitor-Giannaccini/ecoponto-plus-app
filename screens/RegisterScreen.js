@@ -343,8 +343,6 @@ const RegisterScreen = ({ navigation }) => {
                   <View>
                     <Text style={styles.label}>Material selecionado:</Text>
                     <Text style={styles.selectedItemText}>{selectedMaterial}</Text>
-
-                    {/* --- LÓGICA DINÂMICA APLICADA AQUI --- */}
                     
                     {/* Verifica qual é a regra para o material selecionado */}
                     {MATERIAL_POINTS_RULES[selectedMaterial]?.type === 'per_unit' ? (
@@ -389,8 +387,6 @@ const RegisterScreen = ({ navigation }) => {
     </View>
   );
 };
-
-// screens/RegisterScreen.js -> no final do arquivo
 
 const styles = StyleSheet.create({
   permissionText: {
