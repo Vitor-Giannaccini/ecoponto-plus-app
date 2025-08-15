@@ -26,6 +26,9 @@ import { Ionicons, MaterialIcons, MaterialCommunityIcons, FontAwesome6 } from '@
 import { auth, db } from '../firebaseConfig';
 import { collection, doc, runTransaction, serverTimestamp } from "firebase/firestore";
 
+import { MATERIAL_CATEGORIES } from '../constants/materials';
+import CategoryIcon from '../components/CategoryIcon';
+
 // Constantes
 const SCANNER_FRAME_SIZE = 250;
 const { width, height } = Dimensions.get('window');
@@ -52,65 +55,6 @@ const MATERIAL_POINTS_RULES = {
   'Celulares': { points: 30, type: 'per_unit' },
   'Computadores': { points: 80, type: 'per_unit' },
   'TVs e Rádios': { points: 60, type: 'per_unit' },
-};
-
-const MATERIAL_CATEGORIES = [
-  { 
-    name: 'Recicláveis Comuns', 
-    icon: { library: 'MaterialCommunityIcons', name: 'recycle' },
-    items: [
-      { name: 'Papéis e Papelão', icon: { library: 'Ionicons', name: 'newspaper-outline' } },
-      { name: 'Plásticos', icon: { library: 'MaterialCommunityIcons', name: 'toy-brick' } },
-      { name: 'Vidros', icon: { library: 'MaterialCommunityIcons', name: 'bottle-wine-outline' } },
-      { name: 'Metais', icon: { library: 'MaterialCommunityIcons', name: 'magnet-on' } },
-    ]
-  },
-  { 
-    name: 'Construção Civil', 
-    icon: { library: 'Ionicons', name: 'hammer' },
-    items: [
-      { name: 'Entulho', icon: { library: 'FontAwesome6', name: 'bucket' } },
-      { name: 'Madeiras', icon: { library: 'FontAwesome6', name: 'tree' } },
-      { name: 'Cerâmicas', icon: { library: 'MaterialCommunityIcons', name: 'texture-box' } },
-    ]
-  },
-  { 
-    name: 'Móveis e Eletrodomésticos',
-    icon: { library: 'Ionicons', name: 'home' },
-    items: [
-      { name: 'Móveis', icon: { library: 'MaterialCommunityIcons', name: 'sofa' } },
-      { name: 'Eletrodomésticos', icon: { library: 'MaterialCommunityIcons', name: 'washing-machine' } },
-    ]
-  },
-  { 
-    name: 'Pneus', 
-    icon: { library: 'MaterialCommunityIcons', name: 'tire' },
-    items: [
-      { name: 'Pneus Usados', icon: { library: 'MaterialCommunityIcons', name: 'tire' } },
-    ]
-  },
-  { 
-    name: 'Resíduos Eletrônicos',
-    icon: { library: 'FontAwesome6', name: 'computer-mouse' },
-    items: [
-      { name: 'Celulares', icon: { library: 'Ionicons', name: 'phone-portrait-outline' } },
-      { name: 'Computadores', icon: { library: 'FontAwesome6', name: 'computer' } },
-      { name: 'TVs e Rádios', icon: { library: 'FontAwesome6', name: 'radio' } },
-    ]
-  }
-];
-
-const CategoryIcon = ({ icon, size, color, style }) => {
-  if (icon.library === 'Ionicons') {
-    return <Ionicons name={icon.name} size={size} color={color} style={style} />;
-  }
-  if (icon.library === 'MaterialCommunityIcons') {
-    return <MaterialCommunityIcons name={icon.name} size={size} color={color} style={style} />;
-  }
-  if (icon.library === 'FontAwesome6') {
-    return <FontAwesome6 name={icon.name} size={size} color={color} style={style} />;
-  }
-  return null;
 };
 
 const RegisterScreen = ({ navigation }) => {

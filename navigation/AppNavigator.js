@@ -82,15 +82,21 @@ function AppDrawer() {
     <Drawer.Navigator
       drawerContent={(props) => <CustomDrawerContent {...props} />}
       screenOptions={({ navigation }) => ({
+        // Estilos do Cabeçalho
         headerStyle: { backgroundColor: COLORS.primary },
         headerTintColor: COLORS.white,
         headerTitleAlign: 'center',
-        headerTitle: () => <Ionicons name="leaf" size={30} color={COLORS.white} />,
+        
+        headerTitle: '',
+        
         headerLeft: () => (
           <TouchableOpacity onPress={() => navigation.toggleDrawer()} style={{ marginLeft: 15 }}>
             <Ionicons name="menu" size={30} color={COLORS.white} />
           </TouchableOpacity>
         ),
+
+        drawerActiveTintColor: COLORS.primary, // Cor do item ativo (verde claro)
+        drawerActiveBackgroundColor: '#e6f9f0', // Fundo sutil para o item ativo
       })}
     >
       <Drawer.Screen name="Ecoponto+" component={MainTabs} />
