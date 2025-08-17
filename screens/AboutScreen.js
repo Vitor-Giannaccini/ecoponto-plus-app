@@ -1,3 +1,5 @@
+// screens/AboutScreen.js
+
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, SafeAreaView } from 'react-native';
 import { COLORS } from '../constants/colors';
@@ -7,7 +9,7 @@ const AboutScreen = () => {
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
         <Image
-          source={require('../assets/logo.png')} // Certifique-se que o caminho do logo está correto
+          source={require('../assets/logo.png')}
           style={styles.logo}
         />
         <Text style={styles.title}>ECOPONTO+</Text>
@@ -46,7 +48,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
   },
   container: {
-    padding: 20,
+    paddingHorizontal: 20,
     paddingBottom: 40,
   },
   logo: {

@@ -4,22 +4,23 @@ import React, { useState } from 'react';
 import { View, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/colors';
-import { commonStyles } from '../constants/commonStyles'; // 1. Importa os estilos comuns
 
-const StyledInput = ({ iconName, placeholder, isPassword, ...props }) => {
+const StyledInput = ({ iconName, placeholder, isPassword, style, ...props }) => {
   const [isPasswordVisible, setPasswordVisible] = useState(false);
 
   return (
-    // 2. Aplica o estilo de container comum
-    <View style={[commonStyles.inputContainerStyle, styles.viewContainer]}>
-      {iconName && <Ionicons name={iconName} size={22} color={COLORS.lightGray} style={styles.icon} />}
+    <View style={[styles.container, style]}>
+      {iconName && <Ionicons name={iconName} size={22} color={COLORS.lightGray} style={styles.iconLeft} />}
+      
       <TextInput
-        style={[styles.input, commonStyles.textInputStyle]} // 3. Aplica o estilo de texto comum
+        style={styles.input}
         placeholder={placeholder}
         placeholderTextColor={COLORS.lightGray}
         secureTextEntry={isPassword && !isPasswordVisible}
+        multiline={false}
         {...props}
       />
+      
       {isPassword && (
         <TouchableOpacity onPress={() => setPasswordVisible(!isPasswordVisible)}>
           <Ionicons name={isPasswordVisible ? 'eye-off-outline' : 'eye-outline'} size={22} color={COLORS.lightGray} />
@@ -30,18 +31,27 @@ const StyledInput = ({ iconName, placeholder, isPassword, ...props }) => {
 };
 
 const styles = StyleSheet.create({
-  // O estilo do container foi movido para commonStyles, aqui ficam só os ajustes
-  viewContainer: {
+  container: {
+    // Layout
     flexDirection: 'row',
     alignItems: 'center',
+    width: '100%',
+    
+    // Aparência
+    backgroundColor: 'white', // Cor padrão
+    height: 50,
+    borderRadius: 10,
+    paddingHorizontal: 15, // Padding para manter os ícones dentro
+    marginVertical: 10,
   },
-  icon: {
-    marginRight: 10,
-  },
-  // O estilo do texto foi movido para commonStyles, aqui ficam só os ajustes
   input: {
-    flex: 1,
+    flex: 1, // Campo de texto que ocupa o espaço disponível
     height: '100%',
+    fontSize: 16,
+    color: COLORS.dark,
+  },
+  iconLeft: {
+    marginRight: 10, // Espaço entre o ícone da esquerda e o texto
   },
 });
 

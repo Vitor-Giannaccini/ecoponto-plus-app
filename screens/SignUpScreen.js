@@ -7,7 +7,6 @@ import {
 
 import { MaskedTextInput } from "react-native-mask-text";
 
-// 1. Importe as funções do Firebase e a nossa config
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { collection, query, where, getDocs, getFirestore, doc, setDoc } from "firebase/firestore";
 import { auth, db } from '../firebaseConfig';
@@ -28,9 +27,6 @@ const SignUpScreen = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isCheckedTerms, setCheckedTerms] = useState(false);
-
-  // 2. Função de cadastro com a lógica do Firebase
- // Em screens/SignUpScreen.js
 
 const handleSignUp = async () => { // A função precisa ser 'async' para usar o 'await'
   // 1. Validações iniciais (campos vazios, senhas, termos)
@@ -109,7 +105,7 @@ const handleSignUp = async () => { // A função precisa ser 'async' para usar o
 
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-          <StyledInput placeholder="Nome Completo" autoCapitalize="words" value={nome} onChangeText={setNome} />
+          <StyledInput placeholder="Nome completo" autoCapitalize="words" value={nome} onChangeText={setNome} />
           <StyledInput placeholder="E-mail" keyboardType="email-address" value={email} onChangeText={setEmail} />
           
           <MaskedTextInput
@@ -142,14 +138,14 @@ const handleSignUp = async () => { // A função precisa ser 'async' para usar o
               setDataNascimento(rawText);
             }}
             value={dataNascimento}
-            placeholder="Data de Nascimento"
+            placeholder="Data de nascimento"
             keyboardType="numeric"
             style={[commonStyles.inputContainerStyle, commonStyles.textInputStyle]}
             placeholderTextColor={COLORS.lightGray}
           />
           
-          <StyledInput placeholder="Senha" isPassword autoCorrect={false} value={password} onChangeText={setPassword} />
-          <StyledInput placeholder="Confirmar Senha" isPassword autoCorrect={false} value={confirmPassword} onChangeText={setConfirmPassword} />
+          <StyledInput style={styles.fixedInputHeight} placeholder="Senha" isPassword autoCorrect={false} value={password} onChangeText={setPassword} />
+          <StyledInput style={styles.fixedInputHeight} placeholder="Confirmar senha" isPassword autoCorrect={false} value={confirmPassword} onChangeText={setConfirmPassword} />
 
           <TouchableOpacity style={styles.checkboxContainer} onPress={() => setCheckedTerms(!isCheckedTerms)}>
             <Ionicons name={isCheckedTerms ? 'checkbox' : 'square-outline'} size={24} color={COLORS.white} />
@@ -198,7 +194,7 @@ const styles = StyleSheet.create({
   link: {
     fontWeight: 'bold',
     textDecorationLine: 'underline',
-  }
+  },
 });
 
 export default SignUpScreen;
