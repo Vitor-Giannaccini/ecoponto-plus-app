@@ -2,7 +2,16 @@
 
 import React, { useState } from 'react';
 import {
-  View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, KeyboardAvoidingView, Platform, Alert
+  View,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+  ScrollView,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
+  Alert,
+  StatusBar,
 } from 'react-native';
 
 import { MaskedTextInput } from "react-native-mask-text";
@@ -163,7 +172,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.primary,
-  },
+    // Adiciona um espaçamento no topo APENAS para dispositivos Android
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+},
   header: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -6,7 +6,6 @@ import {
   View,
   Text,
   StyleSheet,
-  Button,
   Alert,
   TextInput,
   Dimensions,
@@ -14,7 +13,6 @@ import {
   ScrollView,
   Platform,
   BackHandler,
-  FlatList 
 } from 'react-native';
 
 import { useFocusEffect } from '@react-navigation/native';
@@ -22,12 +20,11 @@ import { CameraView, Camera } from 'expo-camera';
 import { COLORS } from '../constants/colors';
 import ScannerOverlay from '../components/ScannerOverlay';
 import { Ionicons, MaterialIcons, MaterialCommunityIcons, FontAwesome6 } from '@expo/vector-icons';
-
 import { auth, db } from '../firebaseConfig';
 import { collection, doc, runTransaction, serverTimestamp } from "firebase/firestore";
-
 import { MATERIAL_CATEGORIES } from '../constants/materials';
 import CategoryIcon from '../components/CategoryIcon';
+import StyledButton from '../components/StyledButton';
 
 // Constantes
 const SCANNER_FRAME_SIZE = 250;
@@ -89,30 +86,38 @@ const RegisterScreen = ({ navigation }) => {
   useLayoutEffect(() => {
     navigation.setOptions({
       // Define um título diferente dependendo do passo
-      title: step === 'scanning' ? 'Escanear QR Code' : 'Registrar Descarte',
+      title: step === 'scanning' ? 'Escanear QR Code' : 'Registrar descarte',
       
-      headerLeft: () => (
-        <TouchableOpacity
-          onPress={handleBackPress}
-          style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 10 }}
-        >
-          <Ionicons 
-            name="chevron-back" 
-            size={28} 
-            color={Platform.OS === 'ios' ? '#007AFF' : 'black'}
-          />
-          {/* Mostra o texto "Voltar" apenas na etapa do formulário */}
-          {step === 'form' && (
-            <Text 
-              style={{ 
-                color: Platform.OS === 'ios' ? '#007AFF' : 'black', 
-                fontSize: 17 
-              }}>
-              Voltar
-            </Text>
-          )}
-        </TouchableOpacity>
-      ),
+      headerLeft: () => {
+        // Se a plataforma for iOS, mostra o botão de voltar no cabeçalho
+        if (Platform.OS === 'ios') {
+          return (
+            <TouchableOpacity
+              onPress={handleBackPress}
+              style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 10 }}
+            >
+              <Ionicons 
+                name="chevron-back" 
+                size={28} 
+                color={'#007AFF'}
+              />
+              {step === 'form' && (
+                <Text 
+                  style={{ 
+                    color: '#007AFF', 
+                    fontSize: 17 
+                  }}>
+                  Voltar
+                </Text>
+              )}
+            </TouchableOpacity>
+          );
+        }
+        // Se for Android (ou qualquer outra plataforma), não renderiza nada aqui.
+        return null;
+      },
+      // Removemos o espaçador da direita para não afetar o layout
+      headerRight: () => null, 
     });
   }, [navigation, step, selectedCategory, selectedMaterial]);
 
@@ -371,11 +376,19 @@ const RegisterScreen = ({ navigation }) => {
                       </>
                     )}
                     
-                    <Button title="Confirmar Descarte" onPress={handleSubmit} color={COLORS.primary} />
+                    <StyledButton 
+                      title="Confirmar descarte" 
+                      onPress={handleSubmit} 
+                    />
                   </View>
                 )}
-                <View style={{ marginTop: 20 }}>
-                    <Button title="Cancelar e Escanear Novamente" onPress={() => { setStep('scanning'); isProcessingScan.current = false; setSelectedCategory(null); setSelectedMaterial(null); }} color="grey" />
+                <View style={{ marginTop: 10 }}>
+                    <StyledButton 
+                      title="Cancelar e escanear novamente" 
+                      onPress={() => { setStep('scanning'); isProcessingScan.current = false; setSelectedCategory(null); setSelectedMaterial(null); }}
+                      style={{ backgroundColor: '#808080' }}
+                      textStyle={{ color: 'white' }}
+                    />
                 </View>
             
             </ScrollView>

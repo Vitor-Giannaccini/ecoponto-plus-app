@@ -18,6 +18,7 @@ const StyledInput = ({ iconName, placeholder, isPassword, style, ...props }) => 
         placeholderTextColor={COLORS.lightGray}
         secureTextEntry={isPassword && !isPasswordVisible}
         multiline={false}
+        keyboardAppearance="default"
         {...props}
       />
       

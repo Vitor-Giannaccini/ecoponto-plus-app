@@ -50,6 +50,7 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 20,
     paddingBottom: 40,
+    marginTop: 10,
   },
   logo: {
     width: 100,

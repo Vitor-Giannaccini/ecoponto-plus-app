@@ -129,6 +129,8 @@ const ProfileScreen = () => {
             case 'new_password':
                 if (newPassword.length < 6) { Alert.alert("Erro", "A nova senha precisa ter no mínimo 6 caracteres."); return; }
                 if (newPassword !== confirmNewPassword) { Alert.alert("Erro", "As novas senhas não coincidem."); return; }
+                if (newPassword === currentPassword) {Alert.alert("Senha Inválida", "A nova senha não pode ser igual à senha atual."); return;}
+
                 try {
                     await updatePassword(user, newPassword);
                     Alert.alert("Sucesso", "Sua senha foi alterada!");
@@ -286,6 +288,7 @@ const ProfileScreen = () => {
                 transparent={true}
                 visible={modalVisible}
                 animationType="fade"
+                presentationStyle="overFullScreen"
                 onRequestClose={resetAndCloseModal} // Para o botão "voltar" do Android
             >
                 <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
