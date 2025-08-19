@@ -21,7 +21,7 @@ const AboutScreen = () => {
           O <Text style={styles.appName}>Ecoponto+</Text> nasceu para mudar essa realidade.
         </Text>
         
-        <Text style={styles.sectionTitle}>A Solução na palma da sua mão</Text>
+        <Text style={styles.sectionTitle}>A solução na palma da sua mão</Text>
         <Text style={styles.paragraph}>
           Somos mais que um aplicativo; somos uma ponte entre a sua boa ação e um benefício real. Nossa plataforma gamifica o processo de reciclagem, tornando o descarte correto uma atividade recompensadora. Com o Ecoponto+, você registra seus descartes de forma simples, acumula moedas e transforma seu cuidado com o meio ambiente em vantagens diretas, como descontos em impostos municipais. É a economia circular funcionando para você e para a sua cidade.
         </Text>

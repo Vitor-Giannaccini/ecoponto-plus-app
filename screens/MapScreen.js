@@ -79,7 +79,7 @@ const MapScreen = () => {
           },
         },
         {
-          text: 'Copiar Endereço',
+          text: 'Copiar endereço',
           onPress: async () => {
             await Clipboard.setStringAsync(ecoponto.address);
             Alert.alert("Endereço copiado!", "O endereço do ecoponto foi copiado para sua área de transferência.");
@@ -107,6 +107,7 @@ const MapScreen = () => {
         style={styles.map}
         initialRegion={initialRegion}
         showsUserLocation={true}
+        showsMyLocationButton={false}
         provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
       >
         {ecopontos.map(ecoponto => (
@@ -117,17 +118,25 @@ const MapScreen = () => {
               longitude: ecoponto.location.longitude,
             }}
             pinColor={COLORS.primary}
+
+            // --- LÓGICA CONDICIONAL ---
+            // No Android, a ação acontece no clique do MARCADOR
+            onPress={Platform.OS === 'android' ? () => handleCalloutPress(ecoponto) : null}
           >
-            <Callout 
-              tooltip 
-              onPress={() => handleCalloutPress(ecoponto)}
-            >
-              <View style={styles.calloutView}>
-                <Text style={styles.calloutTitle}>{ecoponto.name}</Text>
-                <Text style={styles.calloutDescription}>{ecoponto.address}</Text>
-                <Text style={styles.calloutHint}>Toque para ver as opções</Text>
-              </View>
-            </Callout>
+            {/* No iOS, a ação acontece no clique do CALLOUT (balão) */}
+            {Platform.OS === 'ios' && (
+              <Callout 
+                tooltip 
+                onPress={() => handleCalloutPress(ecoponto)}
+              >
+                <View style={styles.calloutView}>
+                  <Text style={styles.calloutTitle}>{ecoponto.name}</Text>
+                  <Text style={styles.calloutDescription}>{ecoponto.address}</Text>
+                  <View style={styles.separator} />
+                  <Text style={styles.calloutHint}>Toque para ver as opções</Text>
+                </View>
+              </Callout>
+            )}
           </Marker>
         ))}
       </MapView>

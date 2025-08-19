@@ -118,6 +118,7 @@ const HistoryScreen = () => {
         renderItem={renderHistoryItem}
         keyExtractor={item => item.id}
         ListEmptyComponent={<Text style={styles.emptyText}>Você ainda não registrou nenhum descarte.</Text>}
+        contentContainerStyle={{ paddingBottom: 20 }}
       />
     </View>
   );
@@ -132,12 +133,12 @@ const styles = StyleSheet.create({
     paddingBottom: 105, 
   },
   balanceCard: {
-    backgroundColor: COLORS.accent, // Cor de fundo alterada para o verde claro
+    backgroundColor: COLORS.accent,
     padding: 20,
     borderRadius: 20,
-    marginBottom: 30,
-    flexDirection: 'row', // Alinha os itens (imagem e texto) lado a lado
-    alignItems: 'center', // Centraliza os itens verticalmente
+    marginBottom: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.1,
@@ -147,20 +148,20 @@ const styles = StyleSheet.create({
   coinImage: {
     width: 60,
     height: 60,
-    marginRight: 20, // Espaçamento entre a moeda e o texto
+    marginRight: 20,
   },
   balanceLabel: {
-    color: COLORS.dark, // Cor da fonte alterada para preto
+    color: COLORS.dark,
     fontSize: 18,
-    opacity: 0.7, // Um pouco de opacidade para diferenciar do saldo
+    opacity: 0.7,
   },
   balanceAmount: {
-    color: COLORS.dark, // Cor da fonte alterada para preto
-    fontSize: 42, // Ajustei o tamanho para caber melhor
+    color: COLORS.dark,
+    fontSize: 42,
     fontWeight: 'bold',
   },
   balanceCoin: {
-    fontSize: 22, // Ajustei o tamanho
+    fontSize: 22,
     fontWeight: 'normal',
   },
   historyTitle: {

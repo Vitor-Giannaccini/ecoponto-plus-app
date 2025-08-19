@@ -113,10 +113,10 @@ const RegisterScreen = ({ navigation }) => {
             </TouchableOpacity>
           );
         }
-        // Se for Android (ou qualquer outra plataforma), não renderiza nada aqui.
+        // Se for Android (ou qualquer outra plataforma), não renderiza nada
         return null;
       },
-      // Removemos o espaçador da direita para não afetar o layout
+      // Remove o espaçador da direita para não afetar o layout
       headerRight: () => null, 
     });
   }, [navigation, step, selectedCategory, selectedMaterial]);
@@ -357,6 +357,7 @@ const RegisterScreen = ({ navigation }) => {
                         <TextInput
                           style={styles.input}
                           placeholder="Ex: 3"
+                          placeholderTextColor="#aaa"
                           value={weight}
                           onChangeText={setWeight}
                           keyboardType="numeric"
@@ -369,6 +370,7 @@ const RegisterScreen = ({ navigation }) => {
                         <TextInput
                           style={styles.input}
                           placeholder="Ex: 2.5"
+                          placeholderTextColor="#aaa"
                           value={weight}
                           onChangeText={setWeight}
                           keyboardType="numeric"
@@ -378,7 +380,8 @@ const RegisterScreen = ({ navigation }) => {
                     
                     <StyledButton 
                       title="Confirmar descarte" 
-                      onPress={handleSubmit} 
+                      onPress={handleSubmit}
+                      style={{ marginBottom: 10 }} 
                     />
                   </View>
                 )}

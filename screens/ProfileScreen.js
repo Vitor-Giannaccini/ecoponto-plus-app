@@ -452,7 +452,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: COLORS.dark,
         marginHorizontal: 20,
-        marginTop: 20,
+        marginTop: 15,
         marginBottom: 10,
     },
     actionsContainer: {

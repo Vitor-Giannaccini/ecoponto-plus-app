@@ -86,8 +86,7 @@ function AppDrawer() {
         headerStyle: { backgroundColor: COLORS.primary },
         headerTintColor: COLORS.white,
         headerTitleAlign: 'center',
-        
-        headerTitle: '',
+        headerTitle: "ECOPONTO+",
         
         headerLeft: () => (
           <TouchableOpacity onPress={() => navigation.toggleDrawer()} style={{ marginLeft: 15 }}>
