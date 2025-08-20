@@ -13,6 +13,7 @@ import { COLORS } from '../constants/colors';
 // Importe TODAS as suas telas
 import LoginScreen from '../screens/LoginScreen';
 import SignUpScreen from '../screens/SignUpScreen';
+import TermsScreen from '../screens/TermsScreen';
 import HomeScreen from '../screens/HomeScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 import HistoryScreen from '../screens/HistoryScreen';
@@ -99,7 +100,7 @@ function AppDrawer() {
       })}
     >
       <Drawer.Screen name="Ecoponto+" component={MainTabs} />
-      <Drawer.Screen name="Sobre o Ecoponto+" component={AboutScreen} />
+      <Drawer.Screen name="Sobre o Ecoponto+" component={AboutScreen} options={{ headerTitle: '' }} />
     </Drawer.Navigator>
   );
 }
@@ -128,7 +129,20 @@ function AuthStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Login" component={LoginScreen} />
-      <Stack.Screen name="SignUp" component={SignUpScreen} />
+      <Stack.Screen
+        name="SignUp"
+        component={SignUpScreen}
+        options={{ title: 'Cadastro' }}
+      />
+      <Stack.Screen 
+        name="Terms" 
+        component={TermsScreen} 
+        options={{ 
+          headerShown: true,
+          title: 'Termos de Uso',
+          headerTitleAlign: 'center'
+        }} 
+      />
     </Stack.Navigator>
   );
 }

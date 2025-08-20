@@ -8,7 +8,7 @@ export default {
     "slug": "ecoponto-plus",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icone.png",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "extra": {
       "eas": {
@@ -16,7 +16,7 @@ export default {
       }
     },
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -26,7 +26,7 @@ export default {
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/icone-adaptativo.png",
+        "foregroundImage": "./assets/icon-foreground.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.vitorgt.ecopontoplus",

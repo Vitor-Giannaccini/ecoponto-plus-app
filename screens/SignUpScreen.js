@@ -37,7 +37,7 @@ const SignUpScreen = ({ navigation }) => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isCheckedTerms, setCheckedTerms] = useState(false);
 
-const handleSignUp = async () => { // A função precisa ser 'async' para usar o 'await'
+const handleSignUp = async () => {
   // 1. Validações iniciais (campos vazios, senhas, termos)
   if (!nome.trim() || !email.trim() || !telefone.trim() || !cpf.trim() || !dataNascimento.trim() || !password.trim()) {
     Alert.alert("Campos Incompletos", "Por favor, preencha todos os campos para continuar.");
@@ -63,7 +63,7 @@ const handleSignUp = async () => { // A função precisa ser 'async' para usar o
 
     // Se a consulta encontrou algum documento, o CPF já existe
     if (!querySnapshot.empty) {
-      Alert.alert("CPF em Uso", "Este CPF já está cadastrado em nosso sistema.");
+      Alert.alert("CPF em uso", "Este CPF já está cadastrado em nosso sistema.");
       return; // Para a execução
     }
 
@@ -91,7 +91,7 @@ const handleSignUp = async () => { // A função precisa ser 'async' para usar o
     console.log("Código do erro:", error.code);
 
     if (error.code === 'auth/email-already-in-use') {
-      Alert.alert('E-mail em Uso', 'Este endereço de e-mail já está sendo utilizado por outra conta.');
+      Alert.alert('E-mail em uso', 'Este endereço de e-mail já está sendo utilizado por outra conta.');
     } else if (error.code === 'auth/weak-password') {
       Alert.alert('Senha Fraca', 'Sua senha precisa ter no mínimo 6 caracteres.');
     } else if (error.code === 'auth/invalid-email') {
@@ -156,10 +156,17 @@ const handleSignUp = async () => { // A função precisa ser 'async' para usar o
           <StyledInput style={styles.fixedInputHeight} placeholder="Senha" isPassword autoCorrect={false} value={password} onChangeText={setPassword} />
           <StyledInput style={styles.fixedInputHeight} placeholder="Confirmar senha" isPassword autoCorrect={false} value={confirmPassword} onChangeText={setConfirmPassword} />
 
-          <TouchableOpacity style={styles.checkboxContainer} onPress={() => setCheckedTerms(!isCheckedTerms)}>
-            <Ionicons name={isCheckedTerms ? 'checkbox' : 'square-outline'} size={24} color={COLORS.white} />
-            <Text style={styles.checkboxLabel}>Li e Aceito os <Text style={styles.link}>Termos de Uso</Text></Text>
-          </TouchableOpacity>
+          <View style={styles.checkboxContainer}>
+            <TouchableOpacity onPress={() => setCheckedTerms(!isCheckedTerms)}>
+              <Ionicons name={isCheckedTerms ? 'checkbox' : 'square-outline'} size={24} color={COLORS.white} />
+            </TouchableOpacity>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Text style={styles.checkboxLabel}>Li e aceito os </Text>
+                <TouchableOpacity onPress={() => navigation.navigate('Terms')}>
+                    <Text style={styles.linkText}>Termos de Uso</Text>
+                </TouchableOpacity>
+            </View>
+          </View>
 
           <StyledButton title="CONTINUAR" onPress={handleSignUp} style={{ backgroundColor: COLORS.gray, marginTop: 30 }} textStyle={{ color: '#999' }} />
         </ScrollView>
@@ -202,10 +209,11 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontSize: 16,
   },
-  link: {
-    fontWeight: 'bold',
-    textDecorationLine: 'underline',
-  },
+  linkText: {
+        color: COLORS.white,
+        fontWeight: 'bold',
+        textDecorationLine: 'underline',
+    },
 });
 
 export default SignUpScreen;

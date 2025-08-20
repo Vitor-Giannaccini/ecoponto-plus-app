@@ -9,7 +9,7 @@ const AboutScreen = () => {
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
         <Image
-          source={require('../assets/logo.png')}
+          source={require('../assets/icon-foreground.png')}
           style={styles.logo}
         />
         <Text style={styles.title}>ECOPONTO+</Text>
@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: COLORS.primary,
     letterSpacing: 2,
-    marginTop: -50,
+    marginTop: -30,
   },
   sectionTitle: {
     fontSize: 22,

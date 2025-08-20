@@ -114,9 +114,8 @@ const ProfileScreen = () => {
             if (modalContent === 'reauth_change_email') setModalContent('new_email');
             if (modalContent === 'reauth_delete_account') setModalContent('delete_confirm');
             
-            setCurrentPassword(''); // Limpa o campo
         } catch (error) {
-            Alert.alert("Erro de Autenticação", "A senha atual está incorreta.");
+            Alert.alert("Erro de autenticação", "A senha atual está incorreta.");
         }
     };
     
@@ -129,7 +128,7 @@ const ProfileScreen = () => {
             case 'new_password':
                 if (newPassword.length < 6) { Alert.alert("Erro", "A nova senha precisa ter no mínimo 6 caracteres."); return; }
                 if (newPassword !== confirmNewPassword) { Alert.alert("Erro", "As novas senhas não coincidem."); return; }
-                if (newPassword === currentPassword) {Alert.alert("Senha Inválida", "A nova senha não pode ser igual à senha atual."); return;}
+                if (newPassword === currentPassword) {Alert.alert("Senha inválida", "A nova senha não pode ser igual à senha atual."); return;}
 
                 try {
                     await updatePassword(user, newPassword);
@@ -137,26 +136,46 @@ const ProfileScreen = () => {
                     resetAndCloseModal();
                 } catch (err) { Alert.alert("Erro", "Não foi possível alterar a senha."); }
                 break;
-
-            case 'new_email':
-                if (!newEmail || !newEmail.includes('@')) { Alert.alert("Erro", "Digite um e-mail válido."); return; }
-                try {
-                    await updateEmail(user, newEmail);
-                    const userDocRef = doc(db, 'users', user.uid);
-                    await updateDoc(userDocRef, { email: newEmail });
-                    Alert.alert("Sucesso", "Seu e-mail foi alterado!");
-                    resetAndCloseModal();
-                } catch (err) { Alert.alert("Erro", "Não foi possível alterar o e-mail. Ele pode ser inválido ou já estar em uso."); }
-                break;
             
             case 'delete_confirm':
                 try {
-                    // TODO: Implementar Cloud Function para apagar dados do Firestore
+                    // Apaga dados do Firestore
                     await deleteUser(user);
-                    Alert.alert("Conta Excluída", "Sua conta foi excluída com sucesso.");
+                    Alert.alert("Conta excluída", "Sua conta foi excluída com sucesso.");
                     resetAndCloseModal(); // O ouvinte no AppNavigator cuidará do resto
                 } catch (err) { Alert.alert("Erro", "Não foi possível excluir a conta."); }
                 break;
+        }
+    };
+
+    const handleEmailChange = async () => {
+        // 1. Validações iniciais
+        if (!newEmail || !newEmail.includes('@')) { Alert.alert("Erro", "Digite um e-mail válido."); return; }
+        if (newEmail === profileData.email) { Alert.alert("Aviso", "O novo e-mail é igual ao atual."); return; }
+        if (!currentPassword) { Alert.alert("Erro", "Digite sua senha atual para confirmar."); return; }
+
+        try {
+            // 2. Reautentica o usuário com a senha fornecida
+            const user = auth.currentUser;
+            const cred = EmailAuthProvider.credential(user.email, currentPassword);
+            await reauthenticateWithCredential(user, cred);
+            
+            // 3. Altera o e-mail na Autenticação
+            await updateEmail(user, newEmail);
+            
+            // 4. Altera o e-mail também no Firestore
+            const userDocRef = doc(db, 'users', user.uid);
+            await updateDoc(userDocRef, { email: newEmail });
+
+            Alert.alert("Sucesso", "Seu e-mail foi alterado!");
+            resetAndCloseModal();
+        } catch (error) {
+            console.error("Erro ao alterar e-mail:", error);
+            if (error.code === 'auth/wrong-password') {
+                Alert.alert("Erro", "A senha atual está incorreta.");
+            } else {
+                Alert.alert("Erro", "Não foi possível alterar o e-mail. Ele pode ser inválido ou já estar em uso.");
+            }
         }
     };
 
@@ -258,7 +277,7 @@ const ProfileScreen = () => {
 
                 <Text style={styles.sectionTitle}>Gerenciamento da conta</Text>
                 <View style={styles.actionsCard}>
-                    <TouchableOpacity style={styles.actionRow} onPress={() => triggerSensitiveAction('change_email')}>
+                    <TouchableOpacity style={styles.actionRow} onPress={() => { setModalContent('change_email'); setModalVisible(true); }}>
                         <Ionicons name="mail-outline" size={22} color={COLORS.dark} />
                         <Text style={styles.actionText}>Alterar e-mail</Text>
                         <Ionicons name="chevron-forward" size={22} color="grey" />
@@ -323,12 +342,14 @@ const ProfileScreen = () => {
                                     </>
                                 )}
 
-                                {/* --- CONTEÚDO DO PASSO 2: NOVO E-MAIL --- */}
-                                {modalContent === 'new_email' && (
+                                {/* --- CONTEÚDO DO PASSO 2: ALTERAR E-MAIL --- */}
+                                {modalContent === 'change_email' && (
                                     <>
                                         <Text style={styles.modalTitle}>Alterar e-mail</Text>
+                                        <Text style={styles.modalSubtitle}>Digite seu novo e-mail e confirme com sua senha atual.</Text>
                                         <StyledInput style={styles.modalInput} placeholder="Novo e-mail" keyboardType="email-address" autoCapitalize="none" value={newEmail} onChangeText={setNewEmail}/>
-                                        <TouchableOpacity style={styles.modalButtonConfirm} onPress={handleFinalAction}>
+                                        <StyledInput style={styles.modalInput} placeholder="Senha atual" isPassword value={currentPassword} onChangeText={setCurrentPassword}/>
+                                        <TouchableOpacity style={styles.modalButtonConfirm} onPress={handleEmailChange}>
                                             <Text style={styles.modalButtonConfirmText}>Salvar novo e-mail</Text>
                                         </TouchableOpacity>
                                     </>

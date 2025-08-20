@@ -64,7 +64,7 @@ const LoginScreen = ({ navigation }) => {
   const handleForgotPassword = () => {
     // 1. Verifica se o campo de e-mail está preenchido
     if (!email.trim()) {
-      Alert.alert("E-mail Necessário", "Por favor, digite seu endereço de e-mail no campo correspondente para redefinir a senha.");
+      Alert.alert("E-mail necessário", "Por favor, digite seu endereço de e-mail no campo correspondente para redefinir a senha.");
       return;
     }
 
@@ -73,17 +73,17 @@ const LoginScreen = ({ navigation }) => {
       .then(() => {
         // 3. Mostra uma mensagem de sucesso
         Alert.alert(
-          "Verifique seu E-mail",
+          "Verifique seu e-mail",
           "Se existir uma conta com este e-mail, um link para redefinição de senha foi enviado."
         );
       })
       .catch((error) => {
         // 4. Lida com possíveis erros
         console.log("Erro ao enviar e-mail de redefinição:", error.code);
-        // Mesmo em caso de erro (ex: e-mail não encontrado), mostramos a mesma mensagem de sucesso.
+        // Mesmo em caso de erro (ex: e-mail não encontrado), mostra a mesma mensagem de sucesso.
         // Isso é uma prática de segurança para não revelar quais e-mails estão ou não cadastrados.
         Alert.alert(
-          "Verifique seu E-mail",
+          "Verifique seu e-mail",
           "Se existir uma conta com este e-mail, um link para redefinição de senha foi enviado."
         );
       });
@@ -102,7 +102,7 @@ const LoginScreen = ({ navigation }) => {
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={styles.innerContainer}>
             <View style={styles.logoContainer}>
-              <Image source={require('../assets/logo.png')} style={styles.logo} resizeMode="contain" />
+              <Image source={require('../assets/icon-foreground.png')} style={styles.logo} resizeMode="contain" />
               <Text style={styles.title}>ECOPONTO+</Text>
             </View>
 
@@ -156,8 +156,8 @@ const styles = StyleSheet.create({
     marginBottom: 50,
   },
   logo: {
-    width: 200,
-    height: 200,
+    width: 150,
+    height: 150,
     marginBottom: 0,
   },
   title: {
@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: COLORS.primary,
     letterSpacing: 2,
-    marginTop: -50,
+    marginTop: -10,
   },
   buttonContainer: {
     flexDirection: 'row',
