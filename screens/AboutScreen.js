@@ -9,7 +9,7 @@ const AboutScreen = () => {
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
         <Image
-          source={require('../assets/icon-foreground.png')}
+          source={require('../assets/logo.png')}
           style={styles.logo}
         />
         <Text style={styles.title}>ECOPONTO+</Text>

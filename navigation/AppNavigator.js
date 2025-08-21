@@ -9,8 +9,10 @@ import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList, DrawerI
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/colors';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Importe TODAS as suas telas
+import OnboardingScreen from '../screens/OnboardingScreen';
 import LoginScreen from '../screens/LoginScreen';
 import SignUpScreen from '../screens/SignUpScreen';
 import TermsScreen from '../screens/TermsScreen';
@@ -151,13 +153,31 @@ function AuthStack() {
 export default function AppNavigator() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [viewedOnboarding, setViewedOnboarding] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (authenticatedUser) => {
-      setUser(authenticatedUser);
-      setLoading(false);
-    });
-    return unsubscribe;
+    // Função que verifica o onboarding e o status de login
+    const checkOnboardingAndAuth = async () => {
+      try {
+        const value = await AsyncStorage.getItem('@viewedOnboarding');
+        if (value !== null) {
+          setViewedOnboarding(true); // Se já viu, marca como true
+        }
+      } catch (err) {
+        console.log('Error @checkOnboarding:', err);
+      }
+
+      // O ouvinte de autenticação fica aqui, para rodar depois
+      const unsubscribeAuth = onAuthStateChanged(auth, (authenticatedUser) => {
+        setUser(authenticatedUser);
+        setLoading(false); // Finaliza o loading aqui
+      });
+
+      // Retorna a função de limpeza do ouvinte de autenticação
+      return unsubscribeAuth;
+    };
+
+    checkOnboardingAndAuth();
   }, []);
 
   if (loading) {
@@ -171,9 +191,18 @@ export default function AppNavigator() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {user ? (
+        // Se o usuário está logado, o fluxo principal não muda
         <Stack.Screen name="App" component={AppStack} />
       ) : (
-        <Stack.Screen name="Auth" component={AuthStack} />
+        // Se não está logado, criamos um grupo com as telas de Onboarding e Auth
+        <Stack.Group>
+          {!viewedOnboarding ? (
+            // Se nunca viu o onboarding, ele é a primeira tela
+            <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+          ) : null}
+          {/* A tela de Autenticação está sempre disponível neste grupo */}
+          <Stack.Screen name="Auth" component={AuthStack} />
+        </Stack.Group>
       )}
     </Stack.Navigator>
   );

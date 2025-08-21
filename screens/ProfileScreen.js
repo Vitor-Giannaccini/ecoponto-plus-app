@@ -21,7 +21,7 @@ import {
 
 import { mask } from 'react-native-mask-text';
 import { auth, db } from '../firebaseConfig';
-import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc, deleteDoc } from 'firebase/firestore';
 import { signOut, EmailAuthProvider, reauthenticateWithCredential, updatePassword, updateEmail, deleteUser } from "firebase/auth";
 import { COLORS } from '../constants/colors';
 import { Ionicons } from '@expo/vector-icons';
@@ -94,58 +94,10 @@ const ProfileScreen = () => {
 
     // --- LÓGICA DE GERENCIAMENTO DE CONTA COM MODAIS ---
 
-    // Passo 1: O usuário clica em uma ação, abrimos o modal de reautenticação
-    const triggerSensitiveAction = (action) => {
-        setModalContent(`reauth_${action}`); // Ex: 'reauth_change_password'
-        setModalVisible(true);
-    };
-
-    // Passo 2: O usuário confirma a senha atual no modal
-    const handleReauthenticate = async () => {
-        if (!currentPassword) { Alert.alert("Erro", "Digite sua senha atual."); return; }
-
-        try {
-            const user = auth.currentUser;
-            const cred = EmailAuthProvider.credential(user.email, currentPassword);
-            await reauthenticateWithCredential(user, cred);
-
-            // Reautenticação bem-sucedida, avança para o próximo passo
-            if (modalContent === 'reauth_change_password') setModalContent('new_password');
-            if (modalContent === 'reauth_change_email') setModalContent('new_email');
-            if (modalContent === 'reauth_delete_account') setModalContent('delete_confirm');
-            
-        } catch (error) {
-            Alert.alert("Erro de autenticação", "A senha atual está incorreta.");
-        }
-    };
-    
-    // Passo 3: O usuário preenche os dados finais no modal
-    const handleFinalAction = async () => {
+    const reauthenticate = (password) => {
         const user = auth.currentUser;
-        if (!user) return;
-
-        switch (modalContent) {
-            case 'new_password':
-                if (newPassword.length < 6) { Alert.alert("Erro", "A nova senha precisa ter no mínimo 6 caracteres."); return; }
-                if (newPassword !== confirmNewPassword) { Alert.alert("Erro", "As novas senhas não coincidem."); return; }
-                if (newPassword === currentPassword) {Alert.alert("Senha inválida", "A nova senha não pode ser igual à senha atual."); return;}
-
-                try {
-                    await updatePassword(user, newPassword);
-                    Alert.alert("Sucesso", "Sua senha foi alterada!");
-                    resetAndCloseModal();
-                } catch (err) { Alert.alert("Erro", "Não foi possível alterar a senha."); }
-                break;
-            
-            case 'delete_confirm':
-                try {
-                    // Apaga dados do Firestore
-                    await deleteUser(user);
-                    Alert.alert("Conta excluída", "Sua conta foi excluída com sucesso.");
-                    resetAndCloseModal(); // O ouvinte no AppNavigator cuidará do resto
-                } catch (err) { Alert.alert("Erro", "Não foi possível excluir a conta."); }
-                break;
-        }
+        const cred = EmailAuthProvider.credential(user.email, password);
+        return reauthenticateWithCredential(user, cred);
     };
 
     const handleEmailChange = async () => {
@@ -176,6 +128,39 @@ const ProfileScreen = () => {
             } else {
                 Alert.alert("Erro", "Não foi possível alterar o e-mail. Ele pode ser inválido ou já estar em uso.");
             }
+        }
+    };
+
+    const handlePasswordChange = async () => {
+        if (newPassword.length < 6) { Alert.alert("Erro", "A nova senha precisa ter no mínimo 6 caracteres."); return; }
+        if (newPassword !== confirmNewPassword) { Alert.alert("Erro", "As novas senhas não coincidem."); return; }
+        if (newPassword === currentPassword) { Alert.alert("Senha Inválida", "A nova senha não pode ser igual à senha atual."); return; }
+
+        try {
+            await reauthenticate(currentPassword);
+            await updatePassword(auth.currentUser, newPassword);
+            Alert.alert("Sucesso", "Sua senha foi alterada!");
+            resetAndCloseModal();
+        } catch (error) {
+            console.error("Erro ao alterar senha:", error);
+            Alert.alert("Erro", "Não foi possível alterar a senha. Verifique se sua senha atual está correta.");
+        }
+    };
+
+    // OBS: NECESSÁRIO IMPLEMENTAR LÓGICA PARA APAGAR OS DADOS DE DESCARTE
+    const handleDeleteAccount = async () => {
+        if (!currentPassword) { Alert.alert("Erro", "Digite sua senha para confirmar."); return; }
+        try {
+            await reauthenticate(currentPassword);
+            const user = auth.currentUser;
+            const userDocRef = doc(db, "users", user.uid);
+            await deleteDoc(userDocRef);
+            await deleteUser(user);
+            Alert.alert("Conta excluída", "Sua conta e seus dados foram excluídos com sucesso.");
+            resetAndCloseModal();
+        } catch (error) {
+            console.error("Erro ao excluir conta:", error);
+            Alert.alert("Erro", "Não foi possível excluir a conta. Verifique se sua senha está correta.");
         }
     };
 
@@ -283,13 +268,13 @@ const ProfileScreen = () => {
                         <Ionicons name="chevron-forward" size={22} color="grey" />
                     </TouchableOpacity>
                     <View style={styles.separator} />
-                    <TouchableOpacity style={styles.actionRow} onPress={() => triggerSensitiveAction('change_password')}>
+                    <TouchableOpacity style={styles.actionRow} onPress={() => { setModalContent('change_password'); setModalVisible(true); }}>
                         <Ionicons name="key-outline" size={22} color={COLORS.dark} />
                         <Text style={styles.actionText}>Alterar senha</Text>
                         <Ionicons name="chevron-forward" size={22} color="grey" />
                     </TouchableOpacity>
                     <View style={styles.separator} />
-                    <TouchableOpacity style={[styles.actionRow, { borderBottomWidth: 0 }]} onPress={() => triggerSensitiveAction('delete_account')}>
+                    <TouchableOpacity style={[styles.actionRow, { borderBottomWidth: 0 }]} onPress={() => { setModalContent('delete_account'); setModalVisible(true); }}>
                         <Ionicons name="trash-outline" size={22} color={'#c0392b'} />
                         <Text style={[styles.actionText, { color: '#c0392b' }]}>Excluir conta</Text>
                         <Ionicons name="chevron-forward" size={22} color="grey" />
@@ -303,13 +288,7 @@ const ProfileScreen = () => {
             </ScrollView>
 
             {/* --- MODAL DE REAUTENTICAÇÃO --- */}
-            <Modal
-                transparent={true}
-                visible={modalVisible}
-                animationType="fade"
-                presentationStyle="overFullScreen"
-                onRequestClose={resetAndCloseModal} // Para o botão "voltar" do Android
-            >
+            <Modal transparent={true} visible={modalVisible} animationType="fade" presentationStyle="overFullScreen" onRequestClose={resetAndCloseModal}>
                 <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                     <KeyboardAvoidingView 
                         behavior={Platform.OS === "ios" ? "padding" : "height"} 
@@ -318,31 +297,6 @@ const ProfileScreen = () => {
                         <TouchableWithoutFeedback>
                             <View style={styles.modalContainer}>
                                 
-                                {/* --- CONTEÚDO DO PASSO 1: REAUTENTICAÇÃO --- */}
-                                {/reauth/.test(modalContent) && (
-                                    <>
-                                        <Text style={styles.modalTitle}>Confirme sua identidade</Text>
-                                        <Text style={styles.modalSubtitle}>Digite sua senha atual para continuar.</Text>
-                                        <StyledInput style={styles.modalInput} placeholder="Senha atual" isPassword value={currentPassword} onChangeText={setCurrentPassword}/>
-                                        <TouchableOpacity style={styles.modalButtonConfirm} onPress={handleReauthenticate}>
-                                            <Text style={styles.modalButtonConfirmText}>Confirmar</Text>
-                                        </TouchableOpacity>
-                                    </>
-                                )}
-
-                                {/* --- CONTEÚDO DO PASSO 2: NOVA SENHA --- */}
-                                {modalContent === 'new_password' && (
-                                    <>
-                                        <Text style={styles.modalTitle}>Defina sua nova senha</Text>
-                                        <StyledInput style={styles.modalInput} placeholder="Nova senha" isPassword value={newPassword} onChangeText={setNewPassword}/>
-                                        <StyledInput style={styles.modalInput} placeholder="Confirme a nova senha" isPassword value={confirmNewPassword} onChangeText={setConfirmNewPassword}/>
-                                        <TouchableOpacity style={styles.modalButtonConfirm} onPress={handleFinalAction}>
-                                            <Text style={styles.modalButtonConfirmText}>Salvar nova senha</Text>
-                                        </TouchableOpacity>
-                                    </>
-                                )}
-
-                                {/* --- CONTEÚDO DO PASSO 2: ALTERAR E-MAIL --- */}
                                 {modalContent === 'change_email' && (
                                     <>
                                         <Text style={styles.modalTitle}>Alterar e-mail</Text>
@@ -355,18 +309,30 @@ const ProfileScreen = () => {
                                     </>
                                 )}
 
-                                {/* --- CONTEÚDO DO PASSO 2: CONFIRMAR EXCLUSÃO --- */}
-                                {modalContent === 'delete_confirm' && (
+                                {modalContent === 'change_password' && (
+                                    <>
+                                        <Text style={styles.modalTitle}>Alterar senha</Text>
+                                        <Text style={styles.modalSubtitle}>Digite sua senha atual para continuar.</Text>
+                                        <StyledInput style={styles.modalInput} placeholder="Senha atual" isPassword value={currentPassword} onChangeText={setCurrentPassword}/>
+                                        <StyledInput style={styles.modalInput} placeholder="Nova senha" isPassword value={newPassword} onChangeText={setNewPassword}/>
+                                        <StyledInput style={styles.modalInput} placeholder="Confirme a nova senha" isPassword value={confirmNewPassword} onChangeText={setConfirmNewPassword}/>
+                                        <TouchableOpacity style={styles.modalButtonConfirm} onPress={handlePasswordChange}>
+                                            <Text style={styles.modalButtonConfirmText}>Salvar nova senha</Text>
+                                        </TouchableOpacity>
+                                    </>
+                                )}
+                                
+                                {modalContent === 'delete_account' && (
                                     <>
                                         <Text style={styles.modalTitle}>Excluir conta</Text>
-                                        <Text style={styles.modalSubtitle}>Esta ação é permanente e não pode ser desfeita. Todos os seus dados e pontos serão perdidos.</Text>
-                                        <TouchableOpacity style={[styles.modalButtonConfirm, {backgroundColor: '#c0392b'}]} onPress={handleFinalAction}>
+                                        <Text style={styles.modalSubtitle}>Esta ação é permanente. Para confirmar, digite sua senha.</Text>
+                                        <StyledInput style={styles.modalInput} placeholder="Sua senha" isPassword value={currentPassword} onChangeText={setCurrentPassword}/>
+                                        <TouchableOpacity style={[styles.modalButtonConfirm, {backgroundColor: '#c0392b'}]} onPress={handleDeleteAccount}>
                                             <Text style={styles.modalButtonConfirmText}>Sim, excluir minha conta</Text>
                                         </TouchableOpacity>
                                     </>
                                 )}
 
-                                {/* Botão de Cancelar Padrão */}
                                 <TouchableOpacity style={{marginTop: 15}} onPress={resetAndCloseModal}>
                                     <Text style={{color: 'grey'}}>Cancelar</Text>
                                 </TouchableOpacity>

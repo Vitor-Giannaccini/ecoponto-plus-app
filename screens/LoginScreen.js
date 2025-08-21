@@ -47,7 +47,7 @@ const LoginScreen = ({ navigation }) => {
         // --- TRATAMENTO DE ERRO ATUALIZADO ---
         
         // Este código agora cobre "usuário não encontrado" E "senha errada"
-        if (error.code === 'auth/invalid-credential') {
+        if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
           Alert.alert("Erro de Login", "E-mail ou senha inválidos. Por favor, verifique seus dados e tente novamente.");
         
         // Este erro acontece se o e-mail for mal formatado (ex: "teste@teste")
@@ -102,7 +102,7 @@ const LoginScreen = ({ navigation }) => {
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={styles.innerContainer}>
             <View style={styles.logoContainer}>
-              <Image source={require('../assets/icon-foreground.png')} style={styles.logo} resizeMode="contain" />
+              <Image source={require('../assets/logo.png')} style={styles.logo} resizeMode="contain" />
               <Text style={styles.title}>ECOPONTO+</Text>
             </View>
 

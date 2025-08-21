@@ -16,7 +16,7 @@ export default {
       }
     },
     "splash": {
-      "image": "./assets/icon.png",
+      "image": "./assets/icon-foreground.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
